@@ -102,6 +102,19 @@ instance_type = "t3.micro"
 subnet_id     = "subnet-xxxxxxxx"
 ```
 
+## Como validar a entrega
+
+Em uma validação end-to-end, o `terraform apply` deve criar as quatro instâncias e cada uma deve responder o site estático pelo IP público.
+
+Pontos principais de validação:
+
+- `terraform init` e `terraform validate` sem erros;
+- `terraform plan` listando 4 instâncias `aws_instance.ec2` e o security group;
+- instâncias `web-01` a `web-04` com as tags `Environment`, `Project`, `Tagteam`, `CostCenter` e `ManageBy`;
+- Apache respondendo na porta 80 de cada instância (`curl http://<vm_public_ip>`);
+- outputs `vm_id`, `vm_public_ip` e `vm_public_dns` preenchidos;
+- `terraform destroy` removendo tudo ao final do estudo.
+
 ## Autor
 
 **William Alves Coelho** · [@willtechdev](https://github.com/willtechdev)
