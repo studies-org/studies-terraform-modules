@@ -3,6 +3,10 @@
 </h1>
 
 <p align="center">
+  <img src="docs/arch.gif" alt="Arquitetura: Terraform criando 4 EC2 com Apache numa subnet pública" />
+</p>
+
+<p align="center">
   <a href="https://skillicons.dev">
     <img src="https://skillicons.dev/icons?i=terraform,aws,bash,linux" alt="Stacks" />
   </a>
@@ -56,6 +60,7 @@ O módulo de **EC2** já cria a instância, o security group e as tags padroniza
 
 ```text
 studies-terraform-modules/
+├── docs/arch.gif                # Diagrama da arquitetura
 ├── orchertrador.tf              # Orquestrador: cria web-01 a web-04 com o módulo EC2
 ├── variables.tf                 # Valores padrão (ambiente, projeto, tags, AMI, tipo)
 └── terraform/aws/compute/
@@ -71,15 +76,6 @@ studies-terraform-modules/
 ```
 
 ## Fluxo de funcionamento
-
-```mermaid
-flowchart LR
-    O[orchertrador.tf] -->|for_each| M1[module ec2: web-01]
-    O -->|for_each| M2[module ec2: web-02]
-    O -->|for_each| M3[module ec2: web-03]
-    O -->|for_each| M4[module ec2: web-04]
-    M1 --> R[aws_instance + security group + tags + cloud-init]
-```
 
 1. O `variables.tf` da raiz define os valores padrão: ambiente, projeto, time, centro de custo, AMI e tipo de instância.
 2. O `orchertrador.tf` monta um mapa com os quatro servidores (`web-01` a `web-04`), cada um com nome, tipo e ambiente próprios.
@@ -105,6 +101,19 @@ ami_id        = "ami-xxxxxxxxxxxxxxxxx"
 instance_type = "t3.micro"
 subnet_id     = "subnet-xxxxxxxx"
 ```
+
+## Como validar a entrega
+
+Em uma validação end-to-end, o `terraform apply` deve criar as quatro instâncias e cada uma deve responder o site estático pelo IP público.
+
+Pontos principais de validação:
+
+- `terraform init` e `terraform validate` sem erros;
+- `terraform plan` listando 4 instâncias `aws_instance.ec2` e o security group;
+- instâncias `web-01` a `web-04` com as tags `Environment`, `Project`, `Tagteam`, `CostCenter` e `ManageBy`;
+- Apache respondendo na porta 80 de cada instância (`curl http://<vm_public_ip>`);
+- outputs `vm_id`, `vm_public_ip` e `vm_public_dns` preenchidos;
+- `terraform destroy` removendo tudo ao final do estudo.
 
 ## Autor
 
